@@ -3,30 +3,37 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class App {
-    public static void main(String[] args) throws FileNotFoundException {
-        Scanner scan;
-        File file;
+    public static void main(String[] args) {
+        Scanner scan = null;
         String path;
         if(args.length==0) {
             scan = new Scanner(System.in);
-            System.out.print("Podaj nazwę pliku: ");
+            System.out.print("Enter filename: ");
             path = scan.nextLine();
+            scan.close();
         } else {
             path = args[0];
         }
-        file = new File(path);
-        scan = new Scanner(file);
-        double result = 0.00;
-        while(scan.hasNextLine()) {
-            String line = scan.nextLine();
-            if(line.contains("amount")) {
-                String amount = line.substring(line.lastIndexOf("@") + 8, line.length()-3);
-                amount = amount.replace(',', '.');
-                result += Double.parseDouble(amount);
-                System.out.println(amount);
+        File file = new File(path);
+        Money money = new Money(0);
+        try {
+            scan = new Scanner(file);
+            while(scan.hasNextLine()) {
+                String line = scan.nextLine();
+                if(line.contains("amount")) {
+                    String amount = line.substring(line.lastIndexOf("@") + 8, line.length()-3);
+                    amount = amount.replace(",", "");
+                    amount = amount.replace(".", "");
+                    money.add(new Money(Long.parseLong(amount)));
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Incorrect filename!");
+        } finally {
+            if(scan!=null) {
+                scan.close();
             }
         }
-        scan.close();
-        System.out.printf("Total amount: %.2f\n", result);
+        System.out.println("Total amount: " + money);
     }
 }
